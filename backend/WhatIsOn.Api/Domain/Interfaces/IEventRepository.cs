@@ -16,6 +16,12 @@ public interface IEventRepository
     /// </summary>
     Task<Event?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Lean lookup that returns just the event row — used by paths (like
+    /// registration) that don't need sessions, speakers, or organizer.
+    /// </summary>
+    Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
     Task AddAsync(Event @event, CancellationToken cancellationToken = default);
     void Update(Event @event);
 }

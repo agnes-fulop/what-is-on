@@ -4,6 +4,7 @@ using WhatIsOn.Application.Auth.Commands.Register;
 using WhatIsOn.Application.Events.Queries.GetEventById;
 using WhatIsOn.Application.Events.Queries.GetEventList;
 using WhatIsOn.Application.Layouts;
+using WhatIsOn.Application.Registrations.Commands.RegisterForEvent;
 
 namespace WhatIsOn.Application;
 
@@ -17,7 +18,10 @@ public static class DependencyInjection
         services.AddScoped<GetEventListHandler>();
         services.AddScoped<GetEventByIdHandler>();
 
+        services.AddScoped<RegisterForEventHandler>();
+
         services.AddSingleton<LayoutTreeBuilder>();
+        services.AddSingleton(TimeProvider.System);
 
         return services;
     }

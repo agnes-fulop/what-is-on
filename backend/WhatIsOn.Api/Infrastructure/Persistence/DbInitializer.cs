@@ -75,14 +75,37 @@ public static class DbInitializer
 
         var publicEvent = BuildPublicEvent(organizer.Id, speaker.Id);
         var (vipEvent, layout) = BuildVipEvent(organizer.Id, speaker.Id);
+        var futureEvent = BuildFutureEvent(organizer.Id);
 
         context.Users.AddRange(organizer, regular, vip);
         context.Speakers.Add(speaker);
         context.Layouts.Add(layout);
-        context.Events.AddRange(publicEvent, vipEvent);
+        context.Events.AddRange(publicEvent, vipEvent, futureEvent);
 
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    private static Event BuildFutureEvent(Guid organizerId) => new()
+    {
+        Id = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+        Title = "Future Conference 2027",
+        Subtitle = "Registration not yet open",
+        Description = "Used to verify the registration-window gate.",
+        IsVip = false,
+        Date = new DateOnly(2027, 6, 1),
+        Hero = new Hero { Image = string.Empty, CtaText = "Coming soon" },
+        Location = new Location { City = "Remote", Venue = "TBA", Address = string.Empty },
+        Registration = new RegistrationInfo
+        {
+            OpenDate = new DateOnly(2027, 1, 1),
+            CloseDate = new DateOnly(2027, 5, 1),
+            Fee = 0m,
+            EarlyBirdDiscount = 0m
+        },
+        OrganizerId = organizerId,
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
+    };
 
     private static Event BuildPublicEvent(Guid organizerId, Guid speakerId)
     {
@@ -99,7 +122,7 @@ public static class DbInitializer
             Location = new Location { City = "Las Vegas", Venue = "The Venetian", Address = "3355 Las Vegas Blvd S" },
             Registration = new RegistrationInfo
             {
-                OpenDate = new DateOnly(2026, 8, 1),
+                OpenDate = new DateOnly(2026, 1, 1),
                 CloseDate = new DateOnly(2026, 10, 20),
                 Fee = 99m,
                 EarlyBirdDiscount = 20m
@@ -160,7 +183,7 @@ public static class DbInitializer
             Location = new Location { City = "New York", Venue = "Private Club", Address = "1 Park Ave" },
             Registration = new RegistrationInfo
             {
-                OpenDate = new DateOnly(2026, 9, 1),
+                OpenDate = new DateOnly(2026, 1, 1),
                 CloseDate = new DateOnly(2026, 11, 10),
                 Fee = 499m,
                 EarlyBirdDiscount = 0m

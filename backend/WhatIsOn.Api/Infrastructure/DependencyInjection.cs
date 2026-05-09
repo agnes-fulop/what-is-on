@@ -47,5 +47,6 @@ public static class DependencyInjection
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<ILayoutRepository, LayoutRepository>();
         services.AddScoped<ISpeakerRepository, SpeakerRepository>();
+        services.AddScoped<IRegistrationRepository, RegistrationRepository>();
     }
 }

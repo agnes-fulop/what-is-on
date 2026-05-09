@@ -3,7 +3,6 @@ using WhatIsOn.Application.Events.DTOs;
 using WhatIsOn.Application.Layouts;
 using WhatIsOn.Application.Layouts.DTOs;
 using WhatIsOn.Domain.Entities;
-using WhatIsOn.Domain.Enums;
 using WhatIsOn.Domain.Exceptions;
 using WhatIsOn.Domain.Interfaces;
 
@@ -36,29 +35,13 @@ public class GetEventByIdHandler
         var entity = await _events.GetByIdWithDetailsAsync(query.EventId, cancellationToken)
             ?? throw new NotFoundException("Event", query.EventId);
 
-        EnforceVipGate(entity);
+        EventAccessPolicy.EnsureCanAccess(entity, _currentUser);
 
         var layoutDto = entity.LayoutId.HasValue
             ? await BuildLayoutAsync(entity.LayoutId.Value, entity.Sessions, cancellationToken)
             : null;
 
         return MapToDetail(entity, layoutDto);
-    }
-
-    private void EnforceVipGate(Event entity)
-    {
-        if (!entity.IsVip) return;
-
-        if (!_currentUser.IsAuthenticated)
-        {
-            throw new UnauthorizedException("This event is restricted to VIP members. Please sign in.");
-        }
-
-        var role = _currentUser.Role;
-        if (role is not (UserRole.Vip or UserRole.Organizer))
-        {
-            throw new ForbiddenException("This event is restricted to VIP members.");
-        }
     }
 
     private async Task<LayoutDto?> BuildLayoutAsync(
