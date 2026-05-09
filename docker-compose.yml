@@ -1,0 +1,45 @@
+# Brings the full stack up in one command:
+#
+#     docker compose up --build
+#
+# Frontend at http://localhost:5173, backend at http://localhost:5051.
+# The frontend's nginx proxies /api to the backend service so the bundle
+# uses relative URLs and avoids CORS in the Docker setup.
+
+services:
+  backend:
+    build:
+      context: ./backend/WhatIsOn.Api
+    image: whatison-api
+    container_name: whatison-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # Demo-only JWT signing key. Override locally with:
+      #   export JWT_KEY="$(openssl rand -base64 48)"
+      # before running `docker compose up`. Do not reuse this default for
+      # anything beyond a local demo.
+      Jwt__Key: ${JWT_KEY:-xhX51l6uN1+GqpV8jliuRIuah/gyiJreoj7K7BohSpvWGX9v5xcPEnIxVJ001ds+}
+    ports:
+      - "5051:8080"
+    volumes:
+      - whatison-data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/api/events >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+    image: whatison-web
+    container_name: whatison-web
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  whatison-data:
