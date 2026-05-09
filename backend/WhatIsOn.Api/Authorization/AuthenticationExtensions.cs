@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WhatIsOn.Application.Auth.Interfaces;
 using WhatIsOn.Api.Services;
@@ -10,27 +11,24 @@ namespace WhatIsOn.Api.Authorization;
 
 public static class AuthenticationExtensions
 {
-    public static IServiceCollection AddApiAuthentication(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddApiAuthentication(this IServiceCollection services)
     {
-        var jwt = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
-            ?? throw new InvalidOperationException("Jwt configuration section is missing.");
-
-        if (string.IsNullOrWhiteSpace(jwt.Key))
-        {
-            throw new InvalidOperationException(
-                "Jwt:Key is not configured. Set it via 'dotnet user-secrets set Jwt:Key <value>' " +
-                "for local development, or via the Jwt__Key environment variable.");
-        }
-
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            .AddJwtBearer();
+
+        // Bind JwtBearerOptions lazily through IOptions<JwtSettings> so test
+        // hosts can override Jwt:Key/Issuer/Audience via configuration without
+        // racing the eager bind that used to happen at registration time.
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<JwtSettings>>((options, jwtOptions) =>
             {
+                var jwt = jwtOptions.Value;
+                EnsureKeyConfigured(jwt);
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -56,5 +54,15 @@ public static class AuthenticationExtensions
         });
 
         return services;
+    }
+
+    private static void EnsureKeyConfigured(JwtSettings jwt)
+    {
+        if (string.IsNullOrWhiteSpace(jwt.Key))
+        {
+            throw new InvalidOperationException(
+                "Jwt:Key is not configured. Set it via 'dotnet user-secrets set Jwt:Key <value>' " +
+                "for local development, or via the Jwt__Key environment variable.");
+        }
     }
 }
