@@ -64,6 +64,16 @@ public static class DbInitializer
             CreatedAt = DateTime.UtcNow
         };
 
+        var otherOrganizer = new User
+        {
+            Id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
+            Email = "organizer2@example.com",
+            DisplayName = "Other Organizer",
+            PasswordHash = passwordHash,
+            Role = UserRole.Organizer,
+            CreatedAt = DateTime.UtcNow
+        };
+
         var speaker = new Speaker
         {
             Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
@@ -77,7 +87,7 @@ public static class DbInitializer
         var (vipEvent, layout) = BuildVipEvent(organizer.Id, speaker.Id);
         var futureEvent = BuildFutureEvent(organizer.Id);
 
-        context.Users.AddRange(organizer, regular, vip);
+        context.Users.AddRange(organizer, regular, vip, otherOrganizer);
         context.Speakers.Add(speaker);
         context.Layouts.Add(layout);
         context.Events.AddRange(publicEvent, vipEvent, futureEvent);

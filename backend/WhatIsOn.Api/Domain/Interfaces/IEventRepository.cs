@@ -22,6 +22,12 @@ public interface IEventRepository
     /// </summary>
     Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Same as <see cref="GetByIdAsync"/> but tracked by the change tracker —
+    /// used by the update path so EF can detect mutations on save.
+    /// </summary>
+    Task<Event?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
     Task AddAsync(Event @event, CancellationToken cancellationToken = default);
     void Update(Event @event);
 }
