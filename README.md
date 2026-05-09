@@ -185,3 +185,13 @@ what-is-on/
   `*-shm` / `*-wal` siblings if present), and restart — the seed runs again.
 - The seed is idempotent at the API level: it only inserts when the events
   table is empty.
+
+## Going to production
+
+The codebase as it stands is positioned as a working demo. The first slice
+of work to take it to production — Postgres + migrations as a CI step,
+secret management with key rotation, auth hardening (rate limiting, account
+lockout, refresh tokens), an observability stack, paginated/filterable
+event listing, and moving event content to a headless CMS instead of
+building a layout authoring UI — is documented in
+[docs/PRODUCTION_READINESS.md](docs/PRODUCTION_READINESS.md).
