@@ -28,7 +28,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApiAuthentication(builder.Configuration);
+builder.Services.AddApiAuthentication();
 
 var app = builder.Build();
 
@@ -54,3 +54,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Exposed so WebApplicationFactory<Program> in the test project can host the API.
+public partial class Program;
