@@ -6,6 +6,21 @@ Paragraph, SpeakerList, SpeakerCard, SessionSchedule, SessionCard) stored
 server-side and rendered client-side. Supports VIP-gated events, user
 registration, and organizer-only event editing.
 
+## Contents
+
+- [Stack](#stack)
+- [Quick start with Docker](#quick-start-with-docker)
+- [Prerequisites (manual setup)](#prerequisites-manual-setup)
+- [Setup](#setup)
+  - [Backend](#1-backend)
+  - [Frontend](#2-frontend)
+- [Run](#run)
+- [Demo credentials](#demo-credentials)
+- [Endpoints](#endpoints)
+- [Project structure](#project-structure)
+- [Notes](#notes)
+- [Going to production](#going-to-production)
+
 ## Stack
 
 - **Backend** — .NET 10 ASP.NET Core Web API, EF Core 10 + SQLite, JWT bearer
