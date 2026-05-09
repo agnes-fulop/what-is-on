@@ -44,5 +44,8 @@ public static class DependencyInjection
     private static void AddRepositories(IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<ILayoutRepository, LayoutRepository>();
+        services.AddScoped<ISpeakerRepository, SpeakerRepository>();
     }
 }

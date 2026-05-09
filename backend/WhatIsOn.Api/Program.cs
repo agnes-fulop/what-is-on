@@ -3,6 +3,9 @@ using WhatIsOn.Api.Authorization;
 using WhatIsOn.Api.Middleware;
 using WhatIsOn.Application;
 using WhatIsOn.Infrastructure;
+using WhatIsOn.Infrastructure.Persistence;
+
+const string FrontendCorsPolicy = "Frontend";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,11 +18,24 @@ builder.Services
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(FrontendCorsPolicy, policy =>
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApiAuthentication(builder.Configuration);
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    await DbInitializer.SeedAsync(app.Services);
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -29,6 +45,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(FrontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
