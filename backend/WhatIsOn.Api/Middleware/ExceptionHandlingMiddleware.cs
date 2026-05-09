@@ -61,6 +61,7 @@ public class ExceptionHandlingMiddleware
         exception switch
         {
             NotFoundException => (HttpStatusCode.NotFound, "Resource not found"),
+            UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
             ForbiddenException => (HttpStatusCode.Forbidden, "Access forbidden"),
             ConflictException => (HttpStatusCode.Conflict, "Conflict"),
             ValidationException => (HttpStatusCode.BadRequest, "Validation failed"),
