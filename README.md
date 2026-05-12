@@ -19,15 +19,20 @@ registration, and organizer-only event editing.
 - [Endpoints](#endpoints)
 - [Project structure](#project-structure)
 - [Notes](#notes)
+- [Key decisions](#key-decisions)
 - [Going to production](#going-to-production)
 
 ## Stack
 
-- **Backend** — .NET 10 ASP.NET Core Web API, EF Core 10 + SQLite, JWT bearer
-  auth, BCrypt password hashing
-- **Frontend** — React 19 + TypeScript + Vite, Zustand for auth state, native
-  `fetch` (no Axios)
-- **Build** — single .NET project (`backend/WhatIsOn.Api/`) and a Vite app
+- **Backend** — .NET 10 ASP.NET Core Web API (mature, strongly typed,
+  performant), EF Core 10 + SQLite (zero-setup local dev), JWT bearer auth
+  (stateless, horizontally scalable), BCrypt password hashing (industry
+  standard, adjustable work factor)
+- **Frontend** — React 19 + TypeScript + Vite (fast HMR, end-to-end type
+  safety with the API), Zustand for auth state (tiny, no Redux boilerplate),
+  native `fetch` (no Axios — fewer deps, sufficient API surface)
+- **Build** — single .NET project (`backend/WhatIsOn.Api/`, less ceremony
+  than a four-project clean-architecture split at this scale) and a Vite app
   (`frontend/`)
 
 ## Quick start with Docker
@@ -200,6 +205,33 @@ what-is-on/
   `*-shm` / `*-wal` siblings if present), and restart — the seed runs again.
 - The seed is idempotent at the API level: it only inserts when the events
   table is empty.
+
+## Key decisions
+
+- **Single .NET project, layered by namespace.** Chose folder / namespace
+  separation over a four-project Clean Architecture solution
+  (`Domain` / `Application` / `Infrastructure` / `Api`). Less ceremony for a
+  codebase this size; the cost is losing compile-time enforcement of layer
+  boundaries — discipline is enforced by review, not the build.
+
+- **Adjacency-list rows plus a polymorphic JSON `Data` column for the
+  layout tree.** Each layout component is one row with `ParentComponentId`
+  + `SortOrder` and a small JSON blob shaped per component type. Simple
+  schema, trivial to add new component types, queryable at the row level.
+  The cost: reconstructing the tree at read time (handled in one place by
+  `LayoutTreeBuilder`) and the JSON contents are opaque to the database.
+
+- **SQLite for development, JWT in `localStorage` on the client.** The
+  textbook-simple defaults so the demo runs zero-setup. Both have well-known
+  production constraints (multi-instance contention for SQLite, XSS
+  exposure for `localStorage` tokens) — addressed in
+  [docs/PRODUCTION_READINESS.md](docs/PRODUCTION_READINESS.md), not in the
+  demo itself.
+
+- **xUnit + Shouldly + NSubstitute for tests.** Chose this over the more
+  conventional FluentAssertions + Moq. Avoids FluentAssertions v8's
+  commercial license and the Moq telemetry incident; the trade-off is
+  less prevalence in tutorials and Stack Overflow answers.
 
 ## Going to production
 
